@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, keepPreviousData, type UseQueryResult } from '@tanstack/react-query';
 import ReactPaginate from 'react-paginate';
 import toast, { Toaster } from 'react-hot-toast';
@@ -25,6 +25,12 @@ export default function App() {
     placeholderData: keepPreviousData, 
   });
 
+  useEffect(() => {
+    if (data && data.results.length === 0) {
+      toast.error('No movies found for your request.');
+    }
+  }, [data]);
+
   const handleSearch = (newQuery: string) => {
     if (!newQuery.trim()) {
       toast.error('Please enter your search query.');
@@ -43,7 +49,6 @@ export default function App() {
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
 
-      {data && data.results.length === 0 && toast.error('No movies found for your request.')}
       {data && data.results.length > 0 && <MovieGrid movies={data.results} onSelect={() => {}} />}
 
       {data && data.total_pages > 1 && (
