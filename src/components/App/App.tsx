@@ -4,7 +4,9 @@ import ReactPaginate from 'react-paginate';
 import toast, { Toaster } from 'react-hot-toast';
 import { fetchMovies, type TMDBResponse } from '../../services/movieService';
 import SearchBar from '../SearchBar/SearchBar';
+import type { Movie } from '../../types/movie';
 import MovieGrid from '../MovieGrid/MovieGrid';
+import MovieModal from '../MovieModal/MovieModal';
 import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import css from './App.module.css';
@@ -12,6 +14,7 @@ import css from './App.module.css';
 export default function App() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   const {
     data,
@@ -38,18 +41,27 @@ export default function App() {
     }
 
     setQuery(newQuery);
-    setPage(1); 
+    setPage(1);
+    setSelectedMovie(null); 
+  };
+
+   const handleSelect = (movie: Movie) => {
+    setSelectedMovie(movie);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedMovie(null);
   };
 
   return (
     <div>
       <SearchBar onSubmit={handleSearch} />
-      <Toaster position="top-right" />
+      <Toaster position="top-left" />
 
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
 
-      {data && data.results.length > 0 && <MovieGrid movies={data.results} onSelect={() => {}} />}
+      {data && data.results.length > 0 && <MovieGrid movies={data.results} onSelect={handleSelect} />}
 
       {data && data.total_pages > 1 && (
         <ReactPaginate
@@ -68,6 +80,7 @@ export default function App() {
       {isFetching && !isLoading && (
         <p className={css.loadingMore}>Updating movies...</p>
       )}
+      {selectedMovie && <MovieModal movie={selectedMovie} onClose={handleCloseModal} />}
     </div>
   );
 }
